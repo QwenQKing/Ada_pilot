@@ -388,6 +388,12 @@ USE_AESTHETIC="--use_aesthetic" USE_REALISM_PHYSICS="--use_realism_physics" \
 
 ---
 
+## Acknowledgement
+
+This repo benefits from [verl](https://github.com/volcengine/verl) and [vllm-omni](https://github.com/vllm-project/vllm-omni). Thanks for their wonderful works.
+
+---
+
 ## BibTeX
 
 If you find this work helpful, please cite:
