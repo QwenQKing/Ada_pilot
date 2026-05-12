@@ -68,12 +68,10 @@ conda create -n adapilot python==3.12 -y
 conda activate adapilot
 ```
 
-Install verl from source:
+Install verl (pinned commit used in our experiments):
 
 ```bash
-cd adapilot/verl
-pip3 install -e ".[gpu,vllm]"
-cd ../..
+pip3 install "verl[gpu,vllm] @ git+https://github.com/volcengine/verl.git@8e9e73723fd1cc729bedb3bbcf915060afbda91d"
 ```
 
 Install flash-attn (pre-built wheel required — standard pip build often fails):
