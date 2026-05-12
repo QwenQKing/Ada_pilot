@@ -185,6 +185,8 @@ pip install vllm-omni             # then the omni extension
 
 **Supported models and launch scripts** (see `T2I-model/`):
 
+The following models are served via **vllm-omni**:
+
 | Model | Script | GPUs | Port |
 |---|---|---|---|
 | Qwen-Image-2512 (training generator) | `T2I-model/qwen-image.sh` | 4 | 4011 |
@@ -193,6 +195,21 @@ pip install vllm-omni             # then the omni extension
 | Z-Image | `T2I-model/z-image.sh` | 2 | 4011 |
 | Ovis-Image-7B | `T2I-model/ovis.sh` | 8 | 4011 |
 | GLM-Image | `T2I-model/glm.sh` | 4 | 1070 |
+
+**ERNIE-Image** is served via **[SGLang](https://github.com/sgl-project/sglang)** in a separate environment:
+
+```bash
+conda create -n ernie-sglang python=3.12 -y
+conda activate ernie-sglang
+pip install sglang[all]
+```
+
+Then launch:
+
+```bash
+conda activate ernie-sglang
+bash T2I-model/start_ernie.sh
+```
 
 Example (Qwen-Image-2512, training generator):
 
