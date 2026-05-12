@@ -172,20 +172,52 @@ Endpoint: `POST /ocr` (image\_base64 + prompt → result), `POST /v1/chat/comple
 
 #### Image Generation Server
 
-AdaPilot calls the image generator via an OpenAI-compatible `/v1/images/generations` endpoint. In our experiments we used **Qwen-Image-2512** deployed with [vllm-omni](https://github.com/fyabc/vllm-omni), which adds image generation support on top of vLLM.
+AdaPilot calls the image generator via an OpenAI-compatible `POST /v1/images/generations` endpoint. We use [vllm-omni](https://github.com/vllm-project/vllm-omni) to serve all image generation models. **This requires a separate conda environment** from the main AdaPilot environment.
 
-Deploy Qwen-Image-2512 with vllm-omni in a separate conda environment, then set:
+**Install vllm-omni:**
 
 ```bash
-export IMAGE_GEN_BASE_URL=http://<server-ip>:<port>   # e.g. http://10.0.0.1:8080
+conda create -n vllm-omni python=3.12 -y
+conda activate vllm-omni
+pip install vllm==0.20.0          # install vLLM base first
+pip install vllm-omni             # then the omni extension
+```
+
+**Supported models and launch scripts** (see `T2I-model/`):
+
+| Model | Script | GPUs | Port |
+|---|---|---|---|
+| Qwen-Image-2512 (training generator) | `T2I-model/qwen-image.sh` | 4 | 4011 |
+| FLUX.2-klein-base-9B | `T2I-model/flux-9b.sh` | 4 | 4011 |
+| LongCat-Image | `T2I-model/longcat-image.sh` | 8 | 4011 |
+| Z-Image | `T2I-model/z-image.sh` | 2 | 4011 |
+| Ovis-Image-7B | `T2I-model/ovis.sh` | 8 | 4011 |
+| GLM-Image | `T2I-model/glm.sh` | 4 | 1070 |
+
+Example (Qwen-Image-2512, training generator):
+
+```bash
+conda activate vllm-omni
+export CUDA_VISIBLE_DEVICES=0,1,2,3
+vllm serve ./Qwen-Image-2512 \
+  --omni \
+  --port 4011 \
+  --tensor-parallel-size 4 \
+  --gpu-memory-utilization 0.8 \
+  --dtype bfloat16 \
+  --served-model-name Qwen-Image
+```
+
+Once the server is running, set `IMAGE_GEN_BASE_URL` to point to it:
+
+```bash
+export IMAGE_GEN_BASE_URL=http://<server-ip>:4011
 export IMAGE_GEN_SIZE="1024x1024"
 export IMAGE_GEN_STEPS=50
 export IMAGE_GEN_GUIDANCE=4.5
 export IMAGE_GEN_TIMEOUT=300
 export IMAGE_GEN_MAX_CONCURRENT=4
 ```
-
-The client code calls `POST {IMAGE_GEN_BASE_URL}/v1/images/generations` with `prompt`, `size`, `num_inference_steps`, and `guidance_scale`. Any image generation backend that implements this interface can be used as a drop-in replacement.
 
 #### Environment Variables for Training / Evaluation
 
