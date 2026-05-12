@@ -13,8 +13,8 @@ export RAY_PORT="${RAY_PORT:-6566}"
 export RAY_DASHBOARD_PORT="${RAY_DASHBOARD_PORT:-8268}"
 export RAY_TEMP_DIR=/tmp/ray_adapilot_eval
 
-export DATA_ROOT="${DATA_ROOT:-adapilot/data}"
-export RESULT_ROOT="${RESULT_ROOT:-adapilot/results/eval}"
+export DATA_ROOT="${DATA_ROOT:-test-data}"
+export RESULT_ROOT="${RESULT_ROOT:-results/eval}"
 
 export FORCE_RERUN="${FORCE_RERUN:-0}"
 

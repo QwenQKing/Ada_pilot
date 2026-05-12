@@ -7,9 +7,9 @@ export BASE_MODEL="${BASE_MODEL:-/path/to/model}"
 export CKPT_DIR="${CKPT_DIR:-${PROJECT_ROOT}/checkpoints/adapilot/adapilot_train}"
 GLOBAL_STEP="${GLOBAL_STEP:-120}"
 
-DATA_ROOT="data"
+DATA_ROOT="${DATA_ROOT:-test-data}"
 
-RESULT_ROOT="results/adapilot_results"
+RESULT_ROOT="${RESULT_ROOT:-results/adapilot_results}"
 
 export CUDA_VISIBLE_DEVICES=3,2
 

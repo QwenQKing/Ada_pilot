@@ -300,24 +300,50 @@ Our experiments used 2 servers × 8 NVIDIA H100 (80GB) GPUs.
 
 ### Inference
 
-Merge FSDP checkpoint shards and run inference:
+Two inference scripts are provided. Both read test datasets from `test-data/` by default and save results under `results/`.
+
+#### Option A — vLLM multi-dataset inference (recommended)
+
+`inference_vllm.sh` scans all subdirectories in `DATA_ROOT` for `*_test.parquet` files and runs inference on each dataset in sequence. It starts its own Ray cluster internally.
+
+```bash
+export BASE_MODEL=/path/to/Qwen2.5-VL-7B-Instruct
+export CKPT_DIR=/path/to/checkpoints/adapilot/adapilot_train
+export IMAGE_GEN_BASE_URL=http://<image-gen-server>:<port>
+
+bash adapilot/scripts/inference_vllm.sh
+```
+
+Key variables (all optional, defaults shown):
+
+| Variable | Default | Description |
+|---|---|---|
+| `DATA_ROOT` | `test-data` | Root dir scanned for `*_test.parquet` per subdirectory |
+| `RESULT_ROOT` | `results/eval` | Output directory |
+| `FORCE_RERUN` | `0` | Set to `1` to re-run already completed datasets |
+| `DATASETS_FILTER` | _(all)_ | Comma-separated list to run a subset, e.g. `DPG-bench,FinMME` |
+| `CUDA_VISIBLE_DEVICES` | `0,1,2,3` | GPUs to use |
+
+Results are saved to `results/eval/<dataset>/eval_output.json`. Run evaluation after inference:
+
+```bash
+bash adapilot/eval_score.sh
+```
+
+#### Option B — PyTorch single-checkpoint inference
+
+`inference_torch.sh` merges FSDP checkpoint shards to HuggingFace format first, then runs inference with a single model.
 
 ```bash
 export BASE_MODEL=/path/to/Qwen2.5-VL-7B-Instruct
 export CKPT_DIR=/path/to/checkpoints/adapilot/adapilot_train
 export GLOBAL_STEP=120
-export IMAGE_GEN_BASE_URL=http://your-image-gen-server
+export IMAGE_GEN_BASE_URL=http://<image-gen-server>:<port>
 
 bash adapilot/scripts/inference_torch.sh
 ```
 
 Results are saved to `results/adapilot_results/`.
-
-To use a vLLM-accelerated inference server instead:
-
-```bash
-bash adapilot/scripts/inference_vllm.sh
-```
 
 ### Evaluation
 
