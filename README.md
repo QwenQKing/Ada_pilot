@@ -347,11 +347,44 @@ Results are saved to `results/adapilot_results/`.
 
 ### Evaluation
 
+`adapilot/eval_score.sh` reads inference output JSON files, computes all metrics in parallel, and writes per-dataset `eval_metrics.json` plus a summary Excel file.
+
 ```bash
-python adapilot/eval_metrics.py --help
+# Point to the inference results directory
+export RESULT_ROOT=results/eval           # for inference_vllm.sh output
+# export RESULT_ROOT=results/adapilot_results  # for inference_torch.sh output
+
+# Reward model servers (same as training)
+export CLIP_SERVER_URL=http://localhost:8030
+export HPS_SERVER_URL=http://localhost:8020
+export GDINO_SERVER_URL=http://localhost:8010
+export GLM_OCR_API_BASE=http://localhost:4512
+
+bash adapilot/eval_score.sh
 ```
 
-Evaluation covers the same reward dimensions as training: CLIP-T, HPS, Aesthetic (VLM judge), GroundingDINO, and OCR accuracy.
+Key variables:
+
+| Variable | Default | Description |
+|---|---|---|
+| `RESULT_ROOT` | `results/adapilot_results` | Directory containing inference output JSON files |
+| `WORKERS` | `64` | Parallel workers for metric computation |
+| `SKIP_EXISTING` | `0` | Set to `1` to skip datasets already evaluated |
+
+Metrics enabled by default: **CLIP-T**, **HPS**, **GDino** (object grounding), **OCR** (via GLM-OCR).
+
+To also enable aesthetic and realism/physics scoring (requires `VLM_API_BASE`):
+
+```bash
+export VLM_API_BASE=http://<vlm-server>
+export VLM_MODEL=Qwen2.5-VL-72B-Instruct
+USE_AESTHETIC="--use_aesthetic" USE_REALISM_PHYSICS="--use_realism_physics" \
+    bash adapilot/eval_score.sh
+```
+
+**Outputs:**
+- `<RESULT_ROOT>/<dataset>/eval_metrics.json` — per-dataset metric scores
+- `<RESULT_ROOT>/all_datasets_summary.xlsx` — aggregated summary table across all datasets
 
 ---
 
