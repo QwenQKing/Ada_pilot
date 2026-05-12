@@ -170,6 +170,23 @@ CUDA_DEVICE=4 PORT=4512 bash rewardmodel/glm-ocr.sh
 
 Endpoint: `POST /ocr` (image\_base64 + prompt → result), `POST /v1/chat/completions` (OpenAI-compatible), `GET /health`.
 
+#### Image Generation Server
+
+AdaPilot calls the image generator via an OpenAI-compatible `/v1/images/generations` endpoint. In our experiments we used **Qwen-Image-2512** deployed with [vllm-omni](https://github.com/fyabc/vllm-omni), which adds image generation support on top of vLLM.
+
+Deploy Qwen-Image-2512 with vllm-omni in a separate conda environment, then set:
+
+```bash
+export IMAGE_GEN_BASE_URL=http://<server-ip>:<port>   # e.g. http://10.0.0.1:8080
+export IMAGE_GEN_SIZE="1024x1024"
+export IMAGE_GEN_STEPS=50
+export IMAGE_GEN_GUIDANCE=4.5
+export IMAGE_GEN_TIMEOUT=300
+export IMAGE_GEN_MAX_CONCURRENT=4
+```
+
+The client code calls `POST {IMAGE_GEN_BASE_URL}/v1/images/generations` with `prompt`, `size`, `num_inference_steps`, and `guidance_scale`. Any image generation backend that implements this interface can be used as a drop-in replacement.
+
 #### Environment Variables for Training / Evaluation
 
 Once all servers are running, point AdaPilot to them:
