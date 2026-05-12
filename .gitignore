@@ -4,6 +4,7 @@ adapilot/results/
 checkpoints/
 *.parquet
 !test-data/**/*.parquet
+!train-data/**/*.parquet
 *.pq
 *.pt
 *.bin

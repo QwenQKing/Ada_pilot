@@ -7,8 +7,8 @@ export CUDA_VISIBLE_DEVICES=0,1
 export RAY_PORT=6565
 export RAY_DASHBOARD_PORT=8266
 export RAY_TEMP_DIR=/tmp/ray_adapilot
-export TRAIN_DATA_PATH=adapilot/data/mixed/mixed_train.parquet
-export VAL_DATA_PATH=adapilot/data/mixed/mixed_val.parquet
+export TRAIN_DATA_PATH=train-data/train.parquet
+export VAL_DATA_PATH=train-data/val.parquet
 
 export IMAGE_GEN_BASE_URL="${IMAGE_GEN_BASE_URL:-}"
 export IMAGE_GEN_SIZE="1024x1024"

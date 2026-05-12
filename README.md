@@ -253,6 +253,25 @@ Once all servers are running, point AdaPilot to them:
 
 Servers can also be replaced by passing the local model path instead of a URL (e.g. `CLIP_MODEL_PATH` instead of `CLIP_SERVER_URL`), in which case the reward code loads the model in-process.
 
+### Dataset
+
+The mixed training and validation sets are included in `train-data/`:
+
+```
+train-data/
+├── train.parquet    # training split
+└── val.parquet      # validation split
+```
+
+These files are used directly by the training script via:
+
+```bash
+export TRAIN_DATA_PATH=train-data/train.parquet
+export VAL_DATA_PATH=train-data/val.parquet
+```
+
+The dataset covers diverse scene types: compositional generation, e-commerce product imagery, poster design, aesthetic generation, and text-rich synthesis — matching the six in-distribution benchmarks evaluated in the paper.
+
 ### Training
 
 ```bash
