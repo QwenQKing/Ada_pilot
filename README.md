@@ -2,12 +2,12 @@
 
 <div align="center">
 
-[![Paper](https://img.shields.io/badge/Paper-NeurIPS%202026-b31b1b.svg)](https://anonymous.4open.science/r/AdaPilot-0A37)
-[![Code](https://img.shields.io/badge/Code-Anonymous-black.svg)](https://anonymous.4open.science/r/AdaPilot-0A37)
+[![Paper](https://img.shields.io/badge/Paper-NeurIPS%202026-b31b1b.svg)]()
+[![Homepage](https://img.shields.io/badge/Homepage-AdaPilot-black.svg)](https://qwenqking.github.io/adapilot-release/)
 
 ### AdaPilot: Scene-Adaptive Policy Learning for Cross-Generator Text-to-Image Quality Optimization
 
-[📄 Paper](https://anonymous.4open.science/r/AdaPilot-0A37) | [🚀 Quick Start](#quick-start)
+[📄 Paper](#) | [🌐 Homepage](https://qwenqking.github.io/adapilot-release/) | [🚀 Quick Start](#quick-start)
 
 </div>
 
