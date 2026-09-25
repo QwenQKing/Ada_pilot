@@ -1,13 +1,8 @@
-# AdaPilot: Towards Scene-Adaptive Policy Learning for Cross-Generator Text-to-Image Quality Optimization
-
 <div align="center">
 
-[![Paper](https://img.shields.io/badge/Paper-NeurIPS%202026-b31b1b.svg)]()
-[![Homepage](https://img.shields.io/badge/Homepage-AdaPilot-black.svg)](https://qwenqking.github.io/adapilot-release/)
+### **AdaPilot**: Towards Scene-Adaptive Policy Learning for Cross-Generator Text-to-Image Quality Optimization
 
-### AdaPilot: Scene-Adaptive Policy Learning for Cross-Generator Text-to-Image Quality Optimization
-
-[📄 Paper](#) | [🌐 Homepage](https://qwenqking.github.io/adapilot-release/) | [🚀 Quick Start](#quick-start)
+[📄 Paper](https://arxiv.org/abs/2609.29517) | [🏠 Homepage](https://qwenqking.github.io/adapilot-release/) | [🚀 Quick Start](#quick-start) | [💬 Contact](mailto:wenjinliu23@outlook.com)
 
 </div>
 
@@ -399,9 +394,13 @@ This repo benefits from [verl](https://github.com/volcengine/verl) and [vllm-omn
 If you find this work helpful, please cite:
 
 ```bibtex
-@inproceedings{adapilot2026,
-  title     = {AdaPilot: Towards Scene-Adaptive Policy Learning for Cross-Generator Text-to-Image Quality Optimization},
-  booktitle = {Advances in Neural Information Processing Systems},
-  year      = {2026},
+@misc{adapilot2026,
+      title={AdaPilot: Towards Scene-Adaptive Policy Learning for Cross-Generator Text-to-Image Quality Optimization},
+      author={Wenjin Liu and Fayuan Ke and Yue Lu and Zhe Cui and Anh Tuan Luu and Haoran Luo},
+      year={2026},
+      eprint={2609.29517},
+      archivePrefix={arXiv},
+      primaryClass={cs.CV},
+      url={https://arxiv.org/abs/2609.29517},
 }
 ```
