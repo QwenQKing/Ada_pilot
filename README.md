@@ -19,7 +19,7 @@
 Unlike prior methods that are tightly coupled with a specific generator, AdaPilot decouples the policy from generator internals and learns to **zero-shot transfer** across unseen generators without any retraining.
 
 <div align="center">
-  <img src="figs/AdaPilot.png" width="95%"/>
+  <img src="figs/Fig3-0725-2.png" width="95%"/>
 </div>
 
 **Three core mechanisms:**
