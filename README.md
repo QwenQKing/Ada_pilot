@@ -2,7 +2,7 @@
 
 ### **AdaPilot**: Towards Scene-Adaptive Policy Learning for Cross-Generator Text-to-Image Quality Optimization
 
-[📄 Paper](https://arxiv.org/abs/2609.29517) | [🏠 Homepage](https://qwenqking.github.io/adapilot-release/) | [🚀 Quick Start](#quick-start) | [💬 Contact](mailto:wenjinliu23@outlook.com)
+[📄 Paper](https://arxiv.org/abs/2609.29517) | [🏠 Homepage](https://qwenqking.github.io/Ada_pilot/) | [🚀 Quick Start](#quick-start) | [💬 Contact](mailto:wenjinliu23@outlook.com)
 
 </div>
 

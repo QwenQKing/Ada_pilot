@@ -147,8 +147,8 @@
     <h1><span>AdaPilot</span>: Towards Scene-Adaptive Policy Learning<br>for Cross-Generator Text-to-Image Quality Optimization</h1>
 
     <div class="links">
-      <a class="btn-paper btn-disabled" href="#">📄 Paper (coming soon)</a>
-      <a class="btn-code" href="https://github.com/QwenQKing/adapilot-release">💻 Code</a>
+      <a class="btn-paper" href="https://arxiv.org/abs/2609.29517">📄 Paper</a>
+      <a class="btn-code" href="https://github.com/QwenQKing/Ada_pilot">💻 Code</a>
     </div>
   </div>
 </header>
@@ -174,7 +174,7 @@
   <div class="container">
     <h2>Overview</h2>
     <figure class="fig-wrap">
-      <img src="../figs/fig-1.png" alt="AdaPilot overview" width="800" />
+      <img src="figs/fig-1.png" alt="AdaPilot overview" width="800" />
       <figcaption>AdaPilot agent working with an image generator to continuously improve image quality through multi-turn visual feedback.</figcaption>
     </figure>
   </div>
@@ -185,7 +185,7 @@
   <div class="container">
     <h2>Method</h2>
     <figure class="fig-wrap">
-      <img src="../figs/AdaPilot.png" alt="AdaPilot framework" width="860" />
+      <img src="figs/Fig3-0725-2.png" alt="AdaPilot framework" width="860" />
       <figcaption>Overview of the AdaPilot framework. A scene-adaptive policy learns to iteratively assess and refine image generation quality through multi-turn visual feedback interactions, supervised by AdaReward.</figcaption>
     </figure>
 
@@ -212,17 +212,17 @@
     <h2>Results</h2>
 
     <figure class="fig-wrap">
-      <img src="../figs/case_study.png" alt="Qualitative comparison" width="860" />
+      <img src="figs/case_study.png" alt="Qualitative comparison" width="860" />
       <figcaption>Qualitative comparison with baselines. AdaPilot consistently produces the highest quality images across diverse prompts.</figcaption>
     </figure>
 
     <figure class="fig-wrap">
-      <img src="../figs/ood_radar_4.png" alt="Cross-generator transfer" width="820" />
+      <img src="figs/ood_radar_4.png" alt="Cross-generator transfer" width="820" />
       <figcaption>Cross-generator zero-shot transfer on four unseen generators (FLUX.2, LongCat, Ovis, Z-Image) across four out-of-distribution datasets. AdaPilot consistently improves over the base model on all generators.</figcaption>
     </figure>
 
     <figure class="fig-wrap">
-      <img src="../figs/rounds.png" alt="Monotonic improvement across rounds" width="820" />
+      <img src="figs/rounds.png" alt="Monotonic improvement across rounds" width="820" />
       <figcaption>Image quality improves monotonically across interaction rounds on all 10 benchmarks, validating AdaPilot's process-level reward design.</figcaption>
     </figure>
   </div>
@@ -232,10 +232,14 @@
 <section>
   <div class="container">
     <h2>BibTeX</h2>
-    <pre>@inproceedings{adapilot2026,
-  title     = {AdaPilot: Towards Scene-Adaptive Policy Learning for Cross-Generator Text-to-Image Quality Optimization},
-  booktitle = {Advances in Neural Information Processing Systems},
-  year      = {2026},
+    <pre>@misc{adapilot2026,
+      title={AdaPilot: Towards Scene-Adaptive Policy Learning for Cross-Generator Text-to-Image Quality Optimization},
+      author={Wenjin Liu and Fayuan Ke and Yue Lu and Zhe Cui and Anh Tuan Luu and Haoran Luo},
+      year={2026},
+      eprint={2609.29517},
+      archivePrefix={arXiv},
+      primaryClass={cs.CV},
+      url={https://arxiv.org/abs/2609.29517},
 }</pre>
   </div>
 </section>
