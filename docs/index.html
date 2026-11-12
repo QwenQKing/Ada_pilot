@@ -1,256 +1,510 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>AdaPilot</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="AdaPilot: Towards Scene-Adaptive Policy Learning for Cross-Generator Text-to-Image Quality Optimization">
+  <meta name="theme-color" content="#f8fafc">
+  <meta property="og:title" content="AdaPilot">
+  <meta property="og:description" content="Scene-adaptive, cross-generator text-to-image quality optimization via end-to-end reinforcement learning.">
+  <meta property="og:image" content="figs/fig-1.png">
+  <title>AdaPilot | Project Page</title>
+
+  <script>
+    (function () {
+      var key = 'adapilot-theme';
+      var saved = localStorage.getItem(key);
+      var dark = saved === 'dark' || (!saved && window.matchMedia('(prefers-color-scheme: dark)').matches);
+      if (dark) document.documentElement.classList.add('dark');
+      window.toggleTheme = function () {
+        var on = document.documentElement.classList.toggle('dark');
+        localStorage.setItem(key, on ? 'dark' : 'light');
+      };
+    })();
+  </script>
+
   <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #f8fafc;
+      --ink: #0f172a;
+      --muted: #475569;
+      --card: rgba(255, 255, 255, .62);
+      --card-line: rgba(255, 255, 255, .72);
+      --shadow: 0 18px 55px rgba(25, 65, 115, .11);
+      --shadow-hover: 0 20px 48px rgba(31, 73, 125, .14);
+      --blue: #246bfd;
+      --cyan: #16c7de;
+      --mint: #3eddb3;
+      --accent: #1d4ed8;
+      --chip-blue-bg: #dbeafe;
+      --chip-blue-fg: #1d4ed8;
+      --chip-cyan-bg: #cffafe;
+      --chip-cyan-fg: #0e7490;
+      --chip-green-bg: #d1fae5;
+      --chip-green-fg: #047857;
+      --img-bg: #ffffff;
+    }
+    html.dark {
+      --bg: #020617;
+      --ink: #e2e8f0;
+      --muted: #94a3b8;
+      --card: rgba(15, 23, 42, .66);
+      --card-line: rgba(255, 255, 255, .10);
+      --shadow: 0 18px 55px rgba(0, 0, 0, .28);
+      --shadow-hover: 0 20px 48px rgba(0, 0, 0, .32);
+      --accent: #93c5fd;
+      --chip-blue-bg: rgba(30, 58, 138, .5);
+      --chip-blue-fg: #93c5fd;
+      --chip-cyan-bg: rgba(21, 94, 117, .5);
+      --chip-cyan-fg: #67e8f9;
+      --chip-green-bg: rgba(6, 78, 59, .5);
+      --chip-green-fg: #6ee7b7;
+      --img-bg: #0f172a;
+    }
 
+    *, *::before, *::after { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
     body {
-      font-family: "Helvetica Neue", Arial, sans-serif;
-      font-size: 16px;
-      line-height: 1.7;
-      color: #222;
-      background: #fff;
-    }
-
-    /* ── Layout ── */
-    .container { max-width: 900px; margin: 0 auto; padding: 0 24px; }
-
-    /* ── Header ── */
-    header {
-      padding: 60px 0 40px;
-      text-align: center;
-      border-bottom: 1px solid #eee;
-    }
-    header .venue {
-      font-size: 14px;
-      font-weight: 600;
-      letter-spacing: .08em;
-      text-transform: uppercase;
-      color: #c0392b;
-      margin-bottom: 16px;
-    }
-    header h1 {
-      font-size: 2rem;
-      font-weight: 700;
-      line-height: 1.25;
-      margin-bottom: 24px;
-    }
-    header h1 span { color: #c0392b; }
-
-    .links {
-      display: flex;
-      justify-content: center;
-      flex-wrap: wrap;
-      gap: 10px;
-      margin-top: 20px;
-    }
-    .links a {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      padding: 8px 18px;
-      border-radius: 6px;
-      font-size: 14px;
-      font-weight: 600;
-      text-decoration: none;
-      transition: opacity .15s;
-    }
-    .links a:hover { opacity: .8; }
-    .btn-paper   { background: #c0392b; color: #fff; }
-    .btn-code    { background: #222; color: #fff; }
-    .btn-disabled { background: #bbb; color: #fff; cursor: default; pointer-events: none; }
-
-    /* ── Sections ── */
-    section { padding: 56px 0; border-bottom: 1px solid #eee; }
-    section:last-of-type { border-bottom: none; }
-
-    h2 {
-      font-size: 1.4rem;
-      font-weight: 700;
-      margin-bottom: 20px;
-      padding-bottom: 8px;
-      border-bottom: 2px solid #c0392b;
-      display: inline-block;
-    }
-
-    p { margin-bottom: 14px; color: #333; }
-
-    /* ── Figures ── */
-    .fig-wrap {
-      margin: 28px 0;
-      text-align: center;
-    }
-    .fig-wrap img {
-      max-width: 100%;
-      border-radius: 6px;
-      box-shadow: 0 2px 12px rgba(0,0,0,.08);
-    }
-    .fig-wrap figcaption {
-      margin-top: 10px;
-      font-size: 13px;
-      color: #666;
-      max-width: 760px;
-      margin-left: auto;
-      margin-right: auto;
-    }
-
-    /* ── Method cards ── */
-    .cards {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-      gap: 20px;
-      margin-top: 24px;
-    }
-    .card {
-      padding: 20px 22px;
-      border: 1px solid #e0e0e0;
-      border-radius: 8px;
-      background: #fafafa;
-    }
-    .card h3 {
-      font-size: 15px;
-      font-weight: 700;
-      margin-bottom: 8px;
-      color: #c0392b;
-    }
-    .card p { font-size: 14px; margin: 0; color: #444; }
-
-    /* ── BibTeX ── */
-    pre {
-      background: #f5f5f5;
-      border: 1px solid #e0e0e0;
-      border-radius: 6px;
-      padding: 20px;
-      font-size: 13px;
-      overflow-x: auto;
+      margin: 0;
+      background: var(--bg);
+      color: var(--ink);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif;
       line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+      text-rendering: optimizeLegibility;
+    }
+    img { max-width: 100%; }
+    a { color: inherit; }
+
+    .wrap { max-width: 1120px; margin: 0 auto; padding: 0 16px; }
+
+    /* ── Background ─────────────────────────────────────────────── */
+    .bg-layer { position: fixed; inset: 0; z-index: -20; overflow: hidden; pointer-events: none; }
+    .bg-grid {
+      position: absolute; inset: 0;
+      background-image:
+        linear-gradient(rgba(36, 107, 253, .045) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(36, 107, 253, .045) 1px, transparent 1px);
+      background-size: 34px 34px;
+      -webkit-mask-image: linear-gradient(to bottom, #000, transparent 92%);
+      mask-image: linear-gradient(to bottom, #000, transparent 92%);
+    }
+    html.dark .bg-grid {
+      background-image:
+        linear-gradient(rgba(255, 255, 255, .025) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 255, 255, .025) 1px, transparent 1px);
+    }
+    .blob { position: absolute; border-radius: 50%; filter: blur(100px); }
+    .blob-a { top: -160px; right: -128px; width: 544px; height: 544px; background: rgba(96, 165, 250, .25); }
+    .blob-b { top: 384px; left: -192px; width: 512px; height: 512px; background: rgba(110, 231, 183, .20); }
+    .blob-c { bottom: 80px; right: 12%; width: 416px; height: 416px; background: rgba(196, 181, 253, .15); }
+    html.dark .blob-a { background: rgba(37, 99, 235, .20); }
+    html.dark .blob-b { background: rgba(5, 150, 105, .15); }
+    html.dark .blob-c { background: rgba(109, 40, 217, .10); }
+
+    /* ── Header ─────────────────────────────────────────────────── */
+    .site-header { position: sticky; top: 0; z-index: 50; }
+    .nav {
+      display: flex; align-items: center; justify-content: space-between; gap: 12px;
+      margin-top: 12px; padding: 12px 16px; border-radius: 16px;
+      background: rgba(255, 255, 255, .88); border: 1px solid var(--card-line);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px);
+    }
+    html.dark .nav { background: rgba(15, 23, 42, .88); }
+    .brand { display: flex; align-items: center; gap: 12px; font-weight: 700; text-decoration: none; letter-spacing: -.02em; }
+    .brand .mark {
+      display: grid; place-items: center; width: 36px; height: 36px; border-radius: 12px;
+      font-size: 14px; color: #fff;
+      background: linear-gradient(135deg, #2563eb, #06b6d4, #34d399);
+      box-shadow: 0 10px 20px rgba(37, 99, 235, .20);
+    }
+    .nav-links { display: none; gap: 22px; font-size: 14px; }
+    .nav-links a { color: var(--muted); text-decoration: none; transition: color .15s ease; }
+    .nav-links a:hover { color: var(--blue); }
+    .theme-btn {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 8px 12px; border: 0; border-radius: 12px; cursor: pointer;
+      background: transparent; color: var(--ink);
+      font: inherit; font-size: 14px; font-weight: 600;
+      transition: background .15s ease;
+    }
+    .theme-btn:hover { background: rgba(148, 163, 184, .16); }
+    .theme-btn svg { width: 16px; height: 16px; }
+
+    /* ── Hero ───────────────────────────────────────────────────── */
+    .hero { padding-top: 48px; text-align: center; }
+    .badge {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 8px 16px; border-radius: 999px;
+      border: 1px solid rgba(36, 107, 253, .25);
+      background: rgba(36, 107, 253, .06);
+      color: var(--accent); font-size: 11px; font-weight: 700;
+      letter-spacing: .16em; text-transform: uppercase;
+    }
+    .badge .dot { width: 8px; height: 8px; border-radius: 50%; background: #34d399; box-shadow: 0 0 0 5px rgba(52, 211, 153, .13); }
+    .hero-title {
+      margin: 28px 0 0; font-size: clamp(2.75rem, 7vw, 4.5rem);
+      line-height: 1.03; letter-spacing: -.055em;
+    }
+    .gradient-text {
+      background: linear-gradient(100deg, #246bfd 0%, #16c7de 48%, #35d4a8 100%);
+      -webkit-background-clip: text; background-clip: text;
+      -webkit-text-fill-color: transparent; color: transparent;
+    }
+    .hero-sub {
+      max-width: 1000px; margin: 24px auto 0;
+      font-size: clamp(1.25rem, 2.7vw, 2.25rem); font-weight: 600;
+      line-height: 1.28; letter-spacing: -.02em;
+    }
+    .authors { max-width: 900px; margin: 26px auto 0; font-size: 16px; line-height: 2; color: var(--muted); }
+    .authors .lead-author { font-weight: 600; color: var(--accent); }
+
+    .actions { display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; margin-top: 32px; }
+    .btn {
+      display: inline-flex; align-items: center; gap: 10px;
+      padding: 14px 26px; border-radius: 999px; text-decoration: none;
+      font-weight: 600; font-size: 16px; color: var(--ink);
+      background: var(--card); border: 1px solid var(--card-line);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px);
+      transition: transform .18s ease, box-shadow .18s ease;
+    }
+    .btn:hover { transform: scale(1.03); box-shadow: var(--shadow-hover); }
+    .btn svg { width: 17px; height: 17px; flex: none; }
+    .icon-red { color: #ef4444; }
+    .icon-blue { color: #3b82f6; }
+
+    .stats {
+      display: grid; grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px; max-width: 900px; margin: 40px auto 0;
+    }
+    .stat {
+      padding: 16px 12px; border-radius: 16px; text-align: center;
+      background: var(--card); border: 1px solid var(--card-line);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px);
+    }
+    .stat .val { font-size: 20px; font-weight: 700; }
+    .stat .val.gradient-text { font-size: 24px; }
+    .stat .lbl { margin-top: 4px; font-size: 11px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+
+    /* ── Figures ────────────────────────────────────────────────── */
+    .figure-card {
+      max-width: 980px; margin: 48px auto 0; padding: 12px;
+      border-radius: 24px; background: var(--card);
+      border: 1px solid var(--card-line); box-shadow: var(--shadow);
+      backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px);
+    }
+    .figure-inner {
+      padding: 12px; border-radius: 16px; background: var(--img-bg);
+      background-image: linear-gradient(145deg, rgba(36, 107, 253, .045), rgba(62, 221, 179, .07));
+    }
+    html.dark .figure-inner { background-image: none; }
+    .figure-inner img { display: block; width: 100%; height: auto; border-radius: 10px; }
+    figcaption {
+      padding: 12px 12px 6px; text-align: left;
+      font-size: 13px; line-height: 1.7; color: var(--muted);
     }
 
-    /* ── Footer ── */
-    footer {
-      text-align: center;
-      padding: 32px 0;
-      font-size: 13px;
-      color: #999;
+    /* ── Sections ───────────────────────────────────────────────── */
+    .section { margin-top: 96px; scroll-margin-top: 96px; }
+    .section-title { margin: 0; text-align: center; font-size: clamp(1.65rem, 3.2vw, 2.35rem); letter-spacing: -.025em; }
+    .section-title::after {
+      content: ""; display: block; width: 54px; height: 4px;
+      margin: 14px auto 0; border-radius: 999px;
+      background: linear-gradient(90deg, #246bfd, #3eddb3);
+    }
+    .section-lead { max-width: 780px; margin: 24px auto 0; text-align: center; font-size: 17px; color: var(--muted); }
+
+    .panel {
+      margin-top: 32px; padding: 28px; border-radius: 24px;
+      background: var(--card); border: 1px solid var(--card-line);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px);
+    }
+    .panel p { margin: 0; text-align: justify; font-size: 17px; line-height: 1.9; color: var(--muted); }
+
+    .grid-3 { display: grid; gap: 20px; margin-top: 24px; }
+    .grid-2 { display: grid; gap: 24px; margin-top: 32px; }
+
+    .card {
+      padding: 24px; border-radius: 24px;
+      background: var(--card); border: 1px solid var(--card-line);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px);
+      transition: transform .2s ease, box-shadow .2s ease;
+    }
+    .card:hover { transform: translateY(-4px); box-shadow: var(--shadow-hover); }
+    .card h3 { margin: 16px 0 0; font-size: 20px; letter-spacing: -.01em; }
+    .card p { margin: 12px 0 0; font-size: 14px; line-height: 1.7; color: var(--muted); }
+    .card-head { margin-bottom: 18px; }
+    .card-head h3 { margin: 0; font-size: 20px; }
+    .card-head p { margin: 8px 0 0; font-size: 14px; }
+    .num {
+      display: grid; place-items: center; width: 40px; height: 40px;
+      border-radius: 50%; font-size: 14px; font-weight: 700;
+    }
+    .num.blue { background: var(--chip-blue-bg); color: var(--chip-blue-fg); }
+    .num.cyan { background: var(--chip-cyan-bg); color: var(--chip-cyan-fg); }
+    .num.green { background: var(--chip-green-bg); color: var(--chip-green-fg); }
+
+    .result-img { padding: 12px; border-radius: 16px; background: var(--img-bg); }
+    html.dark .result-img { background: #0f172a; }
+    .result-img img { display: block; width: 100%; height: auto; border-radius: 10px; }
+
+    /* ── BibTeX ─────────────────────────────────────────────────── */
+    .bibtex {
+      margin-top: 32px; overflow: hidden; border-radius: 24px;
+      background: #020617; border: 1px solid #334155;
+      box-shadow: 0 20px 40px rgba(2, 6, 23, .20); color: #e2e8f0;
+    }
+    .bibtex-bar {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 12px 20px; border-bottom: 1px solid rgba(255, 255, 255, .10);
+    }
+    .dots { display: flex; gap: 8px; }
+    .dots i { display: block; width: 10px; height: 10px; border-radius: 50%; }
+    .dots i:nth-child(1) { background: #f87171; }
+    .dots i:nth-child(2) { background: #fcd34d; }
+    .dots i:nth-child(3) { background: #34d399; }
+    .copy-btn {
+      padding: 6px 12px; border-radius: 8px; cursor: pointer;
+      border: 1px solid rgba(255, 255, 255, .10);
+      background: rgba(255, 255, 255, .05); color: #cbd5e1;
+      font: inherit; font-size: 12px; font-weight: 600;
+      transition: background .15s ease;
+    }
+    .copy-btn:hover { background: rgba(255, 255, 255, .10); }
+    .bibtex pre {
+      margin: 0; padding: 24px; overflow-x: auto;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      font-size: 13px; line-height: 1.75; color: #e2e8f0;
+    }
+
+    /* ── Footer ─────────────────────────────────────────────────── */
+    .site-footer {
+      margin-top: 96px; padding: 40px 0 56px; text-align: center;
+      border-top: 1px solid rgba(148, 163, 184, .25);
+    }
+    html.dark .site-footer { border-top-color: rgba(255, 255, 255, .10); }
+    .site-footer .name { font-size: 18px; font-weight: 700; }
+    .site-footer p { margin: 8px 0 0; font-size: 14px; color: var(--muted); }
+    .site-footer .credit { margin-top: 14px; font-size: 12px; color: #94a3b8; }
+    .site-footer .credit a { color: inherit; text-decoration: none; }
+    .site-footer .credit a:hover { color: var(--blue); }
+
+    @media (min-width: 768px) {
+      .nav-links { display: flex; }
+      .stats { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+      .grid-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+      .panel { padding: 40px; }
+      .hero { padding-top: 80px; }
+    }
+    @media (min-width: 1024px) {
+      .grid-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto; }
+      *, *::before, *::after { transition: none !important; }
     }
   </style>
 </head>
+
 <body>
-
-<!-- ══ HEADER ══════════════════════════════════════════════════════════════ -->
-<header>
-  <div class="container">
-    <p class="venue">NeurIPS 2026</p>
-    <h1><span>AdaPilot</span>: Towards Scene-Adaptive Policy Learning<br>for Cross-Generator Text-to-Image Quality Optimization</h1>
-
-    <div class="links">
-      <a class="btn-paper" href="https://arxiv.org/abs/2609.29517">📄 Paper</a>
-      <a class="btn-code" href="https://github.com/QwenQKing/Ada_pilot">💻 Code</a>
-    </div>
+  <div class="bg-layer" aria-hidden="true">
+    <div class="bg-grid"></div>
+    <div class="blob blob-a"></div>
+    <div class="blob blob-b"></div>
+    <div class="blob blob-c"></div>
   </div>
-</header>
 
-<!-- ══ ABSTRACT ════════════════════════════════════════════════════════════ -->
-<section>
-  <div class="container">
-    <h2>Abstract</h2>
-    <p>
-      Existing methods for improving text-to-image generation quality have progressed from generator fine-tuning and prompt optimization to reinforcement learning with multi-turn visual feedback. However, existing strategies are deeply coupled with specific generators and tasks, and the learned capabilities are difficult to generalize into a universal quality optimization policy.
-    </p>
-    <p>
-      We propose <strong>AdaPilot</strong>, which learns a <em>scene-adaptive, cross-generator transferable</em> quality optimization policy by formulating multi-turn image generation as a Markov Decision Process (MDP) and optimizing it via end-to-end reinforcement learning. AdaPilot decouples the policy from generator internals to enable cross-generator transfer, introduces scene-aware rewards that adaptively align quality assessment dimensions with task semantics, and employs process-level rewards to model the evolution trajectory of image quality.
-    </p>
-    <p>
-      Experiment results on ten public benchmarks show that AdaPilot outperforms existing baselines in generation quality, out-of-distribution generalization, and cross-generator transfer. A single policy can be zero-shot transferred to generators unseen during training while maintaining gains, with particularly pronounced gains on weaker generators.
-    </p>
-  </div>
-</section>
+  <header class="site-header">
+    <div class="wrap">
+      <div class="nav">
+        <a href="#top" class="brand"><span class="mark">A</span><span>AdaPilot</span></a>
 
-<!-- ══ OVERVIEW ════════════════════════════════════════════════════════════ -->
-<section>
-  <div class="container">
-    <h2>Overview</h2>
-    <figure class="fig-wrap">
-      <img src="figs/fig-1.png" alt="AdaPilot overview" width="800" />
-      <figcaption>AdaPilot agent working with an image generator to continuously improve image quality through multi-turn visual feedback.</figcaption>
-    </figure>
-  </div>
-</section>
+        <nav class="nav-links" aria-label="Main navigation">
+          <a href="#abstract">Abstract</a>
+          <a href="#method">Method</a>
+          <a href="#results">Results</a>
+          <a href="#bibtex">BibTeX</a>
+        </nav>
 
-<!-- ══ METHOD ══════════════════════════════════════════════════════════════ -->
-<section>
-  <div class="container">
-    <h2>Method</h2>
-    <figure class="fig-wrap">
-      <img src="figs/Fig3-0725-2.png" alt="AdaPilot framework" width="860" />
-      <figcaption>Overview of the AdaPilot framework. A scene-adaptive policy learns to iteratively assess and refine image generation quality through multi-turn visual feedback interactions, supervised by AdaReward.</figcaption>
-    </figure>
-
-    <div class="cards">
-      <div class="card">
-        <h3>Adaptive Multi-Turn Generation</h3>
-        <p>The MLLM agent iteratively reasons, generates optimized prompts, assesses the returned image, and autonomously decides when to terminate — forming a closed-loop visual feedback MDP.</p>
-      </div>
-      <div class="card">
-        <h3>AdaReward</h3>
-        <p>Scene-aware rewards activate different metric subsets (CLIP-T, HPS, Aesthetic, GDino, OCR) per scene type with renormalized weights, plus a process-level monotonic improvement constraint across turns.</p>
-      </div>
-      <div class="card">
-        <h3>Cross-Generator Transfer</h3>
-        <p>The policy conditions only on visual observations, fully decoupled from generator internals. A single trained policy zero-shot drives unseen generators without any retraining.</p>
+        <button class="theme-btn" type="button" onclick="toggleTheme()" aria-label="Toggle color theme">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+            <circle cx="12" cy="12" r="9"></circle>
+            <path d="M12 3a9 9 0 0 0 0 18z" fill="currentColor" stroke="none"></path>
+          </svg>
+          <span>Theme</span>
+        </button>
       </div>
     </div>
-  </div>
-</section>
+  </header>
 
-<!-- ══ RESULTS ═════════════════════════════════════════════════════════════ -->
-<section>
-  <div class="container">
-    <h2>Results</h2>
+  <main id="top" class="wrap">
+    <section class="hero">
+      <div class="badge"><span class="dot"></span>Scene-Adaptive Text-to-Image · 2026</div>
 
-    <figure class="fig-wrap">
-      <img src="figs/case_study.png" alt="Qualitative comparison" width="860" />
-      <figcaption>Qualitative comparison with baselines. AdaPilot consistently produces the highest quality images across diverse prompts.</figcaption>
-    </figure>
+      <h1 class="hero-title"><span class="gradient-text">AdaPilot</span></h1>
+      <p class="hero-sub">Towards Scene-Adaptive Policy Learning for Cross-Generator Text-to-Image Quality Optimization</p>
 
-    <figure class="fig-wrap">
-      <img src="figs/ood_radar_4.png" alt="Cross-generator transfer" width="820" />
-      <figcaption>Cross-generator zero-shot transfer on four unseen generators (FLUX.2, LongCat, Ovis, Z-Image) across four out-of-distribution datasets. AdaPilot consistently improves over the base model on all generators.</figcaption>
-    </figure>
+      <div class="authors">
+        <span class="lead-author">Wenjin Liu</span> · Fayuan Ke · Yue Lu · Zhe Cui · Anh Tuan Luu · Haoran Luo
+      </div>
 
-    <figure class="fig-wrap">
-      <img src="figs/rounds.png" alt="Monotonic improvement across rounds" width="820" />
-      <figcaption>Image quality improves monotonically across interaction rounds on all 10 benchmarks, validating AdaPilot's process-level reward design.</figcaption>
-    </figure>
-  </div>
-</section>
+      <div class="actions">
+        <a class="btn" href="https://arxiv.org/abs/2609.29517" target="_blank" rel="noopener">
+          <svg class="icon-red" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+            <path d="M14 2v6h6"></path>
+          </svg>
+          Paper
+        </a>
+        <a class="btn" href="https://github.com/QwenQKing/Ada_pilot" target="_blank" rel="noopener">
+          <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+            <path d="M12 .5C5.73.5.5 5.73.5 12a11.5 11.5 0 0 0 7.86 10.92c.58.1.79-.25.79-.55v-2.1c-3.2.7-3.88-1.4-3.88-1.4-.53-1.34-1.3-1.7-1.3-1.7-1.06-.72.08-.7.08-.7 1.17.08 1.79 1.2 1.79 1.2 1.04 1.79 2.73 1.27 3.4.97.1-.76.4-1.27.73-1.56-2.55-.29-5.23-1.28-5.23-5.7 0-1.26.45-2.29 1.19-3.1-.12-.29-.52-1.46.11-3.05 0 0 .97-.31 3.18 1.18a11 11 0 0 1 5.8 0c2.2-1.49 3.17-1.18 3.17-1.18.63 1.59.23 2.76.12 3.05.74.81 1.18 1.84 1.18 3.1 0 4.43-2.69 5.4-5.25 5.69.41.36.78 1.06.78 2.14v3.17c0 .31.21.66.8.55A11.5 11.5 0 0 0 23.5 12C23.5 5.73 18.27.5 12 .5z"></path>
+          </svg>
+          Code
+        </a>
+        <a class="btn" href="mailto:wenjinliu23@outlook.com">
+          <svg class="icon-blue" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+            <rect x="3" y="5" width="18" height="14" rx="2"></rect>
+            <path d="m3 7 9 6 9-6"></path>
+          </svg>
+          Contact
+        </a>
+      </div>
 
-<!-- ══ BIBTEX ══════════════════════════════════════════════════════════════ -->
-<section>
-  <div class="container">
-    <h2>BibTeX</h2>
-    <pre>@misc{adapilot2026,
-      title={AdaPilot: Towards Scene-Adaptive Policy Learning for Cross-Generator Text-to-Image Quality Optimization},
-      author={Wenjin Liu and Fayuan Ke and Yue Lu and Zhe Cui and Anh Tuan Luu and Haoran Luo},
-      year={2026},
-      eprint={2609.29517},
-      archivePrefix={arXiv},
-      primaryClass={cs.CV},
-      url={https://arxiv.org/abs/2609.29517},
-}</pre>
-  </div>
-</section>
+      <div class="stats">
+        <div class="stat"><div class="val gradient-text">10</div><div class="lbl">Benchmarks</div></div>
+        <div class="stat"><div class="val">Multi-turn</div><div class="lbl">Visual Feedback</div></div>
+        <div class="stat"><div class="val">Frozen</div><div class="lbl">Image Generator</div></div>
+        <div class="stat"><div class="val">Zero-shot</div><div class="lbl">Cross-Generator</div></div>
+      </div>
 
-<!-- ══ FOOTER ══════════════════════════════════════════════════════════════ -->
-<footer>
-  <div class="container">
-    This page template is inspired by academic project pages. &nbsp;|&nbsp;
-    Built with plain HTML &amp; CSS.
-  </div>
-</footer>
+      <figure class="figure-card">
+        <div class="figure-inner">
+          <img src="figs/fig-1.png" width="2000" height="1303" alt="The AdaPilot agent improving image quality through multi-turn visual feedback">
+        </div>
+        <figcaption><strong>Figure 1.</strong> The AdaPilot agent works with a frozen image generator, continuously improving image quality through multi-turn visual feedback.</figcaption>
+      </figure>
+    </section>
 
+    <section id="abstract" class="section">
+      <h2 class="section-title">Abstract</h2>
+      <div class="panel">
+        <p>
+          Existing methods for improving text-to-image generation quality have progressed from generator fine-tuning and prompt optimization to reinforcement learning with multi-turn visual feedback. However, existing strategies are deeply coupled with specific generators and tasks, and the learned capabilities are difficult to generalize into a universal quality optimization policy. We propose <strong>AdaPilot</strong>, which learns a <em>scene-adaptive, cross-generator transferable</em> quality optimization policy by formulating multi-turn image generation as a Markov Decision Process and optimizing it via <strong>end-to-end reinforcement learning</strong>. AdaPilot decouples the policy from generator internals to enable cross-generator transfer, introduces scene-aware rewards that adaptively align quality assessment dimensions with task semantics, and employs process-level rewards to model the evolution trajectory of image quality. Experiments on ten public benchmarks show that AdaPilot outperforms baselines in generation quality, out-of-distribution generalization, and cross-generator transfer — a single policy transfers zero-shot to unseen generators while maintaining positive gains, with particularly pronounced improvements on weaker generators.
+        </p>
+      </div>
+    </section>
+
+    <section id="method" class="section">
+      <h2 class="section-title">Method</h2>
+      <p class="section-lead">A multimodal policy observes the generated image and interaction history, then reasons, assesses and repaints — a closed-loop visual feedback MDP supervised by AdaReward.</p>
+
+      <div class="panel" style="padding: 16px;">
+        <div class="figure-inner">
+          <img src="figs/Fig3-0725-2.png" width="2589" height="1053" loading="lazy" decoding="async" alt="Overview of the AdaPilot framework">
+        </div>
+        <p style="margin-top: 16px; text-align: center; font-size: 13px; line-height: 1.7;"><strong>Figure 2.</strong> Overview of the AdaPilot framework. The scene-adaptive policy iteratively assesses and refines image generation quality through multi-turn visual feedback, supervised by AdaReward.</p>
+      </div>
+
+      <div class="grid-3">
+        <article class="card">
+          <span class="num blue">1</span>
+          <h3>Adaptive Multi-Turn Generation</h3>
+          <p>The MLLM agent iteratively reasons, generates optimized prompts, assesses the returned image, and autonomously decides whether to refine or terminate — a closed-loop visual feedback MDP.</p>
+        </article>
+        <article class="card">
+          <span class="num cyan">2</span>
+          <h3>AdaReward</h3>
+          <p>Scene-aware rewards activate different metric subsets (CLIP-T, HPS, Aesthetic, GDino, OCR) per scene type with renormalized weights, plus a process-level monotonic improvement constraint across turns.</p>
+        </article>
+        <article class="card">
+          <span class="num green">3</span>
+          <h3>Cross-Generator Decoupling</h3>
+          <p>The policy conditions only on visual observations, not generator internals, enabling zero-shot transfer to unseen generators (FLUX.2, LongCat, Ovis, Z-Image, GPT-Image-1, Gemini) at inference time.</p>
+        </article>
+      </div>
+    </section>
+
+    <section id="results" class="section">
+      <h2 class="section-title">Results</h2>
+      <p class="section-lead">AdaPilot outperforms all baselines on six in-distribution and four out-of-distribution datasets, and a single policy zero-shot drives unseen generators.</p>
+
+      <article class="card" style="margin-top: 32px;">
+        <div class="card-head">
+          <h3>Qualitative comparison</h3>
+          <p>AdaPilot consistently produces the highest quality images across diverse prompts.</p>
+        </div>
+        <div class="result-img">
+          <img src="figs/case_study.png" width="2000" height="1110" loading="lazy" decoding="async" alt="Qualitative comparison with baselines">
+        </div>
+      </article>
+
+      <div class="grid-2">
+        <article class="card">
+          <div class="card-head">
+            <h3>Cross-generator transfer</h3>
+            <p>Zero-shot transfer on four unseen generators (FLUX.2, LongCat, Ovis, Z-Image) across four out-of-distribution datasets.</p>
+          </div>
+          <div class="result-img">
+            <img src="figs/ood_radar_4.png" width="2000" height="519" loading="lazy" decoding="async" alt="Out-of-distribution radar chart comparisons">
+          </div>
+        </article>
+        <article class="card">
+          <div class="card-head">
+            <h3>Monotonic improvement</h3>
+            <p>Image quality improves monotonically across interaction rounds on all ten benchmarks.</p>
+          </div>
+          <div class="result-img">
+            <img src="figs/rounds.png" width="2000" height="783" loading="lazy" decoding="async" alt="Monotonic quality improvement across rounds">
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <section id="bibtex" class="section">
+      <h2 class="section-title">BibTeX</h2>
+      <div class="bibtex">
+        <div class="bibtex-bar">
+          <div class="dots" aria-hidden="true"><i></i><i></i><i></i></div>
+          <button id="copy-bibtex" class="copy-btn" type="button">Copy</button>
+        </div>
+        <pre id="bibtex-code"><code>@misc{adapilot2026,
+  title        = {AdaPilot: Towards Scene-Adaptive Policy Learning for Cross-Generator Text-to-Image Quality Optimization},
+  author       = {Wenjin Liu and Fayuan Ke and Yue Lu and Zhe Cui and Anh Tuan Luu and Haoran Luo},
+  year         = {2026},
+  eprint       = {2609.29517},
+  archivePrefix= {arXiv},
+  primaryClass = {cs.CV},
+  url          = {https://arxiv.org/abs/2609.29517}
+}</code></pre>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="wrap">
+      <div class="name">AdaPilot</div>
+      <p>Scene-adaptive, cross-generator text-to-image quality optimization via reinforcement learning.</p>
+      <p class="credit">Template style inspired by <a href="https://lntzm.github.io/showtable-page/" target="_blank" rel="noopener">ShowTable</a> and adapted from <a href="https://nerfies.github.io/" target="_blank" rel="noopener">Nerfies</a>.</p>
+    </div>
+  </footer>
+
+  <script>
+    document.getElementById('copy-bibtex').addEventListener('click', function () {
+      var button = this;
+      var citation = document.getElementById('bibtex-code').innerText;
+      navigator.clipboard.writeText(citation).then(function () {
+        button.textContent = 'Copied';
+        setTimeout(function () { button.textContent = 'Copy'; }, 1600);
+      }).catch(function () {
+        button.textContent = 'Select and copy';
+      });
+    });
+  </script>
 </body>
 </html>
